@@ -7,8 +7,12 @@ TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
-# --- Handler de Debug total ---
-# Usamos un filtro más abierto y añadimos más info
+@app.before_request
+def log_every_request():
+    print(f"DEBUG GLOBAL: Petición entrante: {request.method} {request.path} desde {request.remote_addr}", flush=True)
+    if request.path == '/webhook':
+        print(f"DEBUG GLOBAL: Headers: {dict(request.headers)}", flush=True)
+
 @bot.message_handler(func=lambda message: True)
 def responder_todo(message):
     print(f"DEBUG: ¡HANDLER DISPARADO! Texto: {message.text} | Chat ID: {message.chat.id}", flush=True)
