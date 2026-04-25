@@ -7,36 +7,38 @@ TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
-MAULLIDOS = ["meow", "meow meow", "meeeoooow"]
-
-# --- Handlers con Debug ---
-@bot.message_handler(commands=['ask_figaro'])
-def responder_comando(message):
-    print("DEBUG: Handler /ask_figaro detectado", flush=True)
-    bot.reply_to(message, random.choice(MAULLIDOS))
-
-@bot.message_handler(func=lambda message: True) # Catch-all para ver si cae cualquier cosa
+# --- Handler de Debug total ---
+# Usamos un filtro más abierto y añadimos más info
+@bot.message_handler(func=lambda message: True)
 def responder_todo(message):
-    print(f"DEBUG: Handler universal detectado. Texto: {message.text}", flush=True)
-    if message.chat.type == 'private':
-        bot.reply_to(message, random.choice(MAULLIDOS))
-    else:
-        print("DEBUG: Mensaje no es privado, ignorando.", flush=True)
+    print(f"DEBUG: ¡HANDLER DISPARADO! Texto: {message.text} | Chat ID: {message.chat.id}", flush=True)
+    try:
+        bot.reply_to(message, "Meow, te escucho!")
+    except Exception as e:
+        print(f"DEBUG: Error al intentar responder: {e}", flush=True)
 
-# --- Webhook ---
 @app.route('/webhook', methods=['POST'])
 def get_message():
+    data = request.get_data().decode('utf-8')
+    if not data:
+        return "No data", 200
+    
+    print(f"DEBUG: Webhook recibió: {data[:150]}", flush=True)
+    
     try:
-        json_string = request.get_data().decode('utf-8')
-        # Ya confirmamos que esto se imprime en tus logs
-        print(f"DEBUG: Recibido en Webhook: {json_string[:100]}...", flush=True)
+        update = telebot.types.Update.de_json(data)
         
-        update = telebot.types.Update.de_json(json_string)
+        # --- NUEVO: Inspección de objeto ---
+        if update.message:
+            print(f"DEBUG: Es un mensaje válido. ID: {update.message.message_id}", flush=True)
+        else:
+            print("DEBUG: El JSON recibido NO contiene un objeto 'message' válido.", flush=True)
+            
         bot.process_new_updates([update])
         return "OK", 200
     except Exception as e:
-        print(f"ERROR CRÍTICO: {e}", flush=True)
-        return "Error interno", 500
+        print(f"ERROR: {e}", flush=True)
+        return "Error", 500
 
 @app.route('/')
 def home():
