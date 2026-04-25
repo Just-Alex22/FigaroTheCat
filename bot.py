@@ -36,5 +36,10 @@ def get_message():
         return "OK", 200 
 
 @app.route('/')
+@app.route('/')
 def home():
-    return "Fígaro está en línea", 200
+    try:
+        user = bot.get_me()
+        return f"El bot {user.first_name} (@{user.username}) está conectado y listo.", 200
+    except Exception as e:
+        return f"Error con el token del bot: {str(e)}", 500
