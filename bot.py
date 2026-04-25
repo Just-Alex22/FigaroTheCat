@@ -19,21 +19,21 @@ def responder_todo(message):
 
 @app.route('/webhook', methods=['POST'])
 def get_message():
-    print(f"DEBUG: ¡ENTRADA RECIBIDA! Headers: {request.headers}", flush=True)
-    
     data = request.get_data().decode('utf-8')
-    print(f"DEBUG: Contenido crudo: {data[:100]}", flush=True)
-    
-    if not data:
-        return "OK", 200 
-
     try:
         update = telebot.types.Update.de_json(data)
-        bot.process_new_updates([update])
-        return "OK", 200
+        
+        # --- FORZAR RESPUESTA ---
+        if update.message:
+            chat_id = update.message.chat.id
+            print(f"DEBUG: Intentando enviar mensaje a {chat_id}", flush=True)
+            bot.send_message(chat_id, "¡Fígaro responde! (Prueba manual)")
+            return "OK", 200
+        
+        return "OK (No es mensaje)", 200
     except Exception as e:
         print(f"ERROR: {e}", flush=True)
-        return "OK", 200 
+        return "Error", 500
 
 @app.route('/')
 @app.route('/')
