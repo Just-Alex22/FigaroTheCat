@@ -9,7 +9,6 @@ app = Flask(__name__)
 
 MAULLIDOS = ["meow", "meow meow", "meeeoooow"]
 
-# --- Lógica del Bot ---
 @bot.message_handler(commands=['ask_figaro'])
 def responder_comando(message):
     bot.reply_to(message, random.choice(MAULLIDOS))
@@ -18,7 +17,7 @@ def responder_comando(message):
 def responder_privado(message):
     bot.reply_to(message, random.choice(MAULLIDOS))
 
-@app.route('/' + TOKEN, methods=['POST'])
+@app.route('/webhook', methods=['POST'])
 def get_message():
     json_string = request.get_data().decode('utf-8')
     update = telebot.types.Update.de_json(json_string)
