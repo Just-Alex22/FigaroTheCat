@@ -16,14 +16,19 @@ def responder_comando(message):
 @bot.message_handler(func=lambda message: message.chat.type == 'private')
 def responder_privado(message):
     bot.reply_to(message, random.choice(MAULLIDOS))
-
 @app.route('/webhook', methods=['POST'])
 def get_message():
-    json_string = request.get_data().decode('utf-8')
-    update = telebot.types.Update.de_json(json_string)
-    bot.process_new_updates([update])
-    return "!", 200
+    try:
+        json_string = request.get_data().decode('utf-8')
+        print(f"DEBUG: Datos recibidos: {json_string}")
+        
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return "OK", 200
+    except Exception as e:
+        print(f"ERROR CRÍTICO EN WEBHOOK: {e}")
+        return "Error interno", 500
 
 @app.route('/')
 def home():
-    return "Online", 200
+    return "Fígaro está en línea", 200
