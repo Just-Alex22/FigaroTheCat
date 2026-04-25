@@ -1,0 +1,2 @@
+# FigaroTheCat
+Emotional Support Bot
